@@ -1,0 +1,249 @@
+<html>
+<head>
+<title>REPEL HTTP:BL - Documentation</title>
+<style type="text/css" media="all">
+  body { font: "Palatino";
+         border-width: 3px; 
+         border-style: solid; 
+         border-color: orange;
+         padding: 1em;
+         margin: 1%; }
+
+  h1 { margin-bottom: 0.1em; 
+       padding-bottom: 0.1em;
+       font-size: 3em;}
+
+  h2 { font-variant: small-caps;
+       margin-top: 1.5em;
+       margin-bottom: 1em; }
+
+  h1, h2 {
+     font: "Helvetica"; }
+
+  .byline { 
+     font-style: italic;
+     padding-top: 0em;
+     padding-bottom: 1em;
+     margin-top: 0em;
+     margin-bottom: 1em; }
+
+  dt { 
+     font-weight: bold;
+     padding-top: 0.5em;}
+
+  dd {
+     padding-top: 0.5em;
+     padding-bottom: 0.5em;}
+
+  li {
+     padding-top: 0.5em;
+     padding-bottom: 0.5em; }
+
+  ul, ol, dl {
+     background-color: #E8E8E8;
+     padding-top: 2em;
+     padding-bottom: 2em;
+     padding-left: 3.5em;
+     padding-right: 2em;
+     margin: 2em;
+     border-width: 1px; 
+     border-style: dashed; 
+     border-color: #C8C8C8; }
+
+  code {
+     margin-left: 0.2em;
+     margin-right: 0.2em;
+     padding-left: 0.2em;
+     padding-right: 0.2em;
+     border-width: 1px; 
+     border-style: solid; 
+     background-color: #F0F0F0;
+     border-color: #D8D8D8; }
+
+  code:first-line {
+     border-color: #123456;}
+  
+  p {line-height: 1.5em; }
+
+  .tm { 
+     font-variant: small-caps;
+     letter-spacing: 150%;
+     font-weight: bold;}
+
+  .flytrap {
+     color: white;
+     font-size: 0px;
+     display: hidden
+     border: 0px;
+     margin: 0px;
+     height: 0px;
+     width: 0px; }
+
+</style>
+
+</head>
+<body>
+<h1 class="tm">Repel http:BL</h1>
+<div align="right" class="flytrap"><a href="http://in-progress.com/honning/index.html" class="flytrap">buzz buzz</a></div>
+<p class="byline">by Terje Norderhaug</p>
+
+<p><a class ="tm" href="http://repel.in-progress.com">Repel http:BL</a> is used with the <a href="http://www.apache.org">Apache webserver</a> to identify friendly search engines and detect malicious web bots such as email address harvesters and comment spammers. It accesses the DNS blacklist registry compiled by <a href="http://projecthoneypot.org/about_us.php?rf=51041">Project Honeypot</a> to reliably determine the type and threat level of robots visiting your server. <span class="tm">Repel</span> can for example be used to:</p>
+
+<ul>
+<li>Prevent malicious bots from accessing the websites.</li>
+<li>Redirect harvester and comment spammers to a <a href="http://en.wikipedia.org/wiki/Honeypot_(computing)">honey pot</a>.</li>
+<li>Use strict verification like <a href="http://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a> only on suspected harvesters and comment spammers rather than all visitors.</li>
+<li>Tailor content to search engines to facilitate proper indexing.</li>
+</ul>
+
+<p>Eliminating the flood of requests often made by malicious bots may <strong>improve the performance</strong> of web servers. Preventing harvesting of email addresses may lead to <strong>less spam</strong>. Blocking comment spammers from posting may <strong>reduce clutter on blogs and message boards</strong>.</p>
+
+<p><span class ="tm">Repel</span> is <em>free</em> and comes with open source licensed under LGPL. It works with <a href="http://python.org/">Python 2.3.5</a> or later.</p>
+
+<h2>Getting Started</h2>
+
+<a href="http://repel.in-progress.com/download">Download the latest version of <span class ="tm">Repel</span></a>. You can activate it for Apache webservers using <a href="http://httpd.apache.org/docs/2.2/rewrite/">rewrite rules</a>:</p>
+
+<ol>
+<li>Open the configuration file for Apache.</li>
+
+<li>Enable the rewrite engine by placing the following in the configuration file:
+
+<p><code>RewriteEngine on</code></p>
+</li>
+
+<li>Declare a rewrite lock to synchronize communication with mapping programs:
+
+<p><code>RewriteLock /path/to/Apache/rewritelock.lock</code></p>
+</li>
+
+<li>Declare a rewrite map using <span class ="tm">Repel</span> as mapping function:
+
+<p><code>RewriteMap REPEL "prg:/path/to/scripts/Repel/repel.py --key=honeypotkey"</code></p>
+
+<p>Use your own key from <a href="http://projecthoneypot.org/?rf=51041">Project Honeypot</a> in place of the honeypotkey. You can alternatively insert the key in the <cite>options</cite> file of Repel.</p></li>
+
+<li>Define a condition for when to apply the rewrite rule, for example, when the IP address of the request matches any suspicious or malicious bot:
+
+<p><code>RewriteCond ${REPEL:%{REMOTE_ADDR}|OK} Suspicious|Malicious</code></p></li>
+
+<li>Define a rule applied to clients that matches the condition to, for example, refuse access to all locations:<br /><br />
+
+<p><code>RewriteRule ^.* - [F]</code></p>
+
+<p>Place this rule on the line immediately following the rewrite condition.</p>
+
+<p>You are encouraged to <a href="http://projecthoneypot.org/manage_honey_pots.php?rf=51041">install your own honeypot</a> and redirect harvesters and commentspammers to it. You can for example define a rewrite condition as above and use a rewrite rule like:</p>
+
+<p><code>RewriteCond ${REPEL:%{REMOTE_ADDR}|OK} Harvester|CommentSpammer</code><br />
+<code>RewriteRule ^.* /cgi-bin/honeypot.py [L]</code></p>
+</li>
+</ol>
+
+<p>Note that each virtual host definition needs to have a <code>RewriteEngine on</code> directive to enable rewriting. Optionally place an <code>rewriteoptions inherit</code> directive in the Apache virtual host definition to apply the rewrite rules of the main server. Keep in mind that the main rewrite rules are applied <em>after</em> the rewrite rules of the virtual host no matter the order in the configuration file.</p>
+
+<p>For questions about configuration or other concerns, please visit the <a href="http://repel.in-progress.com/forum/">Repel support forum</a>.</p>
+
+<h2>Response Format</h2>
+
+<p><span class ="tm">Repel</span> is technically a filter that reads IP addresses from input, looks each up as a DNSBL query from a DNS server, and emits the result in the same order as in the input, provided in a format suitable for regular expression matching. Start <span class ="tm">Repel</span> with a <code>--log</code> option to log responses in a file so you can examine the format:</p>
+
+<p><code>RewriteMap REPEL "prg:/path/to/scripts/Repel/repel.py --key=honeypotkey --log=httpbl.log"</code></p>
+
+<p>When <span class ="tm">Repel</span> identifies an IP address as a bot, it reponds with a code consisting of four pairs of <a href="http://en.wikipedia.org/wiki/Hexadecimal">hexadecimal</a> digits, separated by colons (e.g. "7F:01:01:06"). The meaning of these numbers (as decimals) is described in the <a href="http://projecthoneypot.org/httpbl_api?rf=51041">Project Honeypot API</a>. For your convenience, the code is followed by a combination of descriptive keywords that decodes the result, so you can match these in the Apache rewrite conditions:</p>
+
+<dl>
+<dt>SearchEngine</dt>
+<dd>An innocent, legit search engine. This keyword might be followed by an equal sign and a label identifying the specific engine, e.g. "SearchEngine=Google".</dd>
+
+<dt>Suspicious</dt>
+<dd>Has engaged in behavior that is consistent with a malicious bot, but malicious behavior has not yet been observed.</dd>
+	 
+<dt>Malicious</dt>
+<dd>Definitely a malicious bot.
+
+<dt>Harvester</dt>
+<dd>A bot harvesting email addresses.</dd>
+
+<dt>CommentSpammer</dt>
+<dd>A bot that automatically posts comments on blogs and web message boards.</dd>
+
+<dt>Dormant=xx</dt>
+<dd>How many days since the bot last visisted a honeypot, as two hex digits larger than zero. Not included if the bot has been active the past day.</dd>
+
+<dt>Threat=xx</dt>
+<dd>A rough hexadecimal measure of the threat the bot may pose to your site. Not included if the bot is not known to pose any threat.</dd> 
+
+<dt>Expired=mm:ss:nn</dt>
+<dd>The DNSBL query timed out after minutes, seconds, milliseconds.</dd>
+</dl>
+
+<h2>Search Engine Labels</h2>
+
+<p>These labels identify friendly search engines in the response:</p>
+
+<ul>
+<li>AltaVista</li>
+<li>Ask</li>
+<li>Baidu</li>
+<li>Excite</li>
+<li>Google</li>
+<li>Looksmart</li>
+<li>Lycos</li>
+<li>MSN</li>
+<li>Yahoo</li>
+<li>Cuil</li>
+<li>InfoSeek</li>
+</ul>
+
+<h2>Command Options</h2>
+
+<p>The command line can take the following options:</p>
+
+<dl>
+<dt>-k or --key</dt>
+<dd>Access key provided by the DNSBL host.</dd>
+<dt>-d or --domain</dt>
+<dd>The domain name of the DNSBL host.</dd>
+<dt>-f or --format</dt>
+<dd>File or directory pathname defining the result format.</dd>
+<dt>-l or --log</dt>
+<dd>File pathname to log the DNSBL responses in a format usable by Apache text rewrite maps.</dd>
+<dt>-t or --timeout</dt>
+<dd>A decimal number denoting the time in seconds before an unsuccessful lookup is considered to have expired.</dd>
+<dt>-c or --cache</dt>
+<dd>A whole number signifying the number of recent requests kept in the cache to reduce redundant DNSBL queries.</dd>
+</dl>
+
+<p>To get a list with other options, start the application with <code>-h</code>.</p>
+
+<h2>Batch processing</h2>
+
+<p>You can run <span class ="tm">Repel</span> as a filter from a terminal/shell, for testing or batch processing. By default, it reads lines of IP addresses from standard input and outputs the decoded DNSBL response.</p>
+
+<p>Alternatively list one or more filenames on the command line as sources for IP addresses to look up. The output is in Apache rewritemap format with the original address first on the line.
+
+<h2>Optimization</h2>
+
+<p>The tradeoff of using Repel is a slight increase in latency for the requests that require HTTP:BL verification, but this can be minimized by skipping the test for apparent human visitors.</p>
+
+<p>When you have the basic configuration working, you may add additional rewrite conditions to bypass <span class ="tm">Repel</span> for requests that almost certainly are made by humans, such as when the visitors have authenticated with a password, come from within your own domain, or have a cookie that proves earlier access.</p>
+
+<p>You can speed up DNSBL queries by running a local DNS server. It reduces the time to query DNSBL when there are a time lag between repeated requests from the same address. 
+
+<p>Administrators of demanding web servers may consider the <a href="http://www.projecthoneypot.org/httpbl_download.php?rf=51041">mod_httpbl</a> Apache module as an alternative.</p>
+
+<h2>Troubleshooting</h2>
+
+<dl>
+<dt>All responses are NONE</dt>
+<dd>If all responses are NONE, you likely forgot to provide a DNSBL access key. Get one from <a href="http://projecthoneypot.org?rf=51041">Project Honeypot</a>.</dd>
+</dl>
+
+<p>Visit the <a href="http://repel.in-progress.com/forum/">Repel support forum</a> for other issues.</p>
+
+</body>
+</html>
+
+
+

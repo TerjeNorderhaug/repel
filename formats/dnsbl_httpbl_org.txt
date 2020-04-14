@@ -1,0 +1,68 @@
+^(.*)$
+\1
+
+^$
+NONE
+
+^7F:00:00:01$
+NONE
+
+^7F:..:..:00$
+ SearchEngine
+
+^7F:..:01:00$
+=AltaVista
+
+^7F:..:02:00$
+=Ask
+
+^7F:..:03:00$
+=Baidu
+
+^7F:..:04:00$
+=Excite
+
+^7F:..:05:00$
+=Google
+
+^7F:..:06:00$
+=Looksmart
+
+^7F:..:07:00$
+=Lycos
+
+^7F:..:08:00$
+=MSN
+
+^7F:..:09:00$
+=Yahoo
+
+^7F:..:0A:00$
+=Cuil
+
+^7F:..:0B:00$
+=InfoSeek
+
+^7F:..:(?!00)..:.[13579BDF]$
+ Suspicious
+
+^7F:.*[2468ACE]$
+ Malicious
+
+^7F:.*[2367ABEF]$
+ Harvester
+
+^7F:.*[4567CDEF]$
+ CommentSpammer
+
+^7F:(?!00)(..):..:(?!00)..$
+ Dormant=\1
+
+^7F:..:(?!00)(..):(?!00)..$
+ Threat=\1
+
+^FF:(.*)$
+ Error=\1
+
+^00:(.*)$
+ Expired=\1

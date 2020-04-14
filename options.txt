@@ -1,0 +1,16 @@
+# Configuration file for Repel http:BL <repel.in-progress.com>.
+# These options can alternatively be set on the command line.
+# Typical use: insert your DNSBL key and optionally the name
+# of a logfile such as bl.log after their respective labels.
+
+[HTTPBL]
+key: 
+logfile:
+domain: dnsbl.httpbl.org
+format: dnsbl_httpbl_org.txt
+
+[DEFAULT]
+timeout: 3.0
+workers: 4
+cache: 1000
+mode: async
